@@ -1,0 +1,10 @@
+What A we tool did you use?
+    We used GitHub Copilot.
+
+How did you use it? What kind of questions did you ask? (include links to your conversation if applicable)
+    We used GitHub Copilot to assist with understanding and working with tools that were new to us, including:
+
+    - Svelte, Vite, and Web Unit Testing Frameworks (e.g., Vitest): Copilot provided example snippets, suggested test structures,     and offered autocomplete support as we explored how to set up and write tests for Svelte components.
+    - SCSS Refactoring: We used Copilot to help refactor CSS from Assignment 1 into SCSS. This included generating variable     declarations, restructuring with nesting, and organizing styles for better modularity and scalability.
+
+We did not rely on Copilot to generate complete solutions but used it as a tool for guidance, learning, and increased productivity

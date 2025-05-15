@@ -1,64 +1,73 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import svelteLogo from './assets/svelte.svg';
-  import viteLogo from '/vite.svg';
-  import Counter from './lib/Counter.svelte';
+  import { onMount } from "svelte";
+  import nytLogo from "./assets/nyt-logo.png";
+  import { getDate, getArticles } from "./script";
 
-  let apiKey: string = '';
+  export let date_display = getDate();
 
+  export let articles: any[] = [];
   onMount(async () => {
-    try {
-      const res = await fetch('/api/key');
-      const data = await res.json();
-      apiKey = data.apiKey;
-    } catch (error) {
-      console.error('Failed to fetch API key:', error);
-    }
-  }); 
+    // Articles fetched using backend API route in app.py
+    articles = await getArticles();
+  });
 </script>
 
+<header>
+  <div class="header-container">
+    <!-- logo image and dynamic date -->
+    <img src={nytLogo} alt="The New York Times" />
+    <div id="current-date">{date_display}</div>
+  </div>
+  <nav class="main-nav">
+    <ul>
+      <!-- list of potential pages -->
+      <li class="nav-item"><a href="#">U.S.</a></li>
+      <li class="nav-item"><a href="#">World</a></li>
+      <li class="nav-item"><a href="#">Business</a></li>
+      <li class="nav-item"><a href="#">Arts</a></li>
+      <li class="nav-item"><a href="#">Lifestyle</a></li>
+      <li class="nav-item"><a href="#">Opinion</a></li>
+      <li class="nav-item"><a href="#">Audio</a></li>
+      <li class="nav-item"><a href="#">Games</a></li>
+      <li class="nav-item"><a href="#">Cooking</a></li>
+      <li class="nav-item"><a href="#">Wirecutter</a></li>
+      <li class="nav-item"><a href="#">Atlantic</a></li>
+    </ul>
+  </nav>
+</header>
+<hr />
+<hr />
 <main>
-  <div>
-    <a href="https://vite.dev" target="_blank" rel="noreferrer">
-      <img src={viteLogo} class="logo" alt="Vite Logo" />
-    </a>
-    <a href="https://svelte.dev" target="_blank" rel="noreferrer">
-      <img src={svelteLogo} class="logo svelte" alt="Svelte Logo" />
-    </a>
-  </div>
-  <h1>Vite + Svelte</h1>
-
-  <div class="card">
-    <Counter />
-  </div>
-
-  <p>
-    Your API Key: <strong>{apiKey}</strong>
-  </p>
-
-  <p>
-    Check out <a href="https://github.com/sveltejs/kit#readme" target="_blank" rel="noreferrer">SvelteKit</a>, the official Svelte app framework powered by Vite!
-  </p>
-
-  <p class="read-the-docs">
-    Click on the Vite and Svelte logos to learn more
-  </p>
+  <!-- Main content displayed as a media-responsive grid -->
+  <!-- Iterate over retrieved articles -->
+  {#each articles as article}
+    <article>
+      <img
+        src={article.multimedia.default.url}
+        alt={article.multimedia.caption}
+      />
+      <h2>{article.headline.main}</h2>
+      <p>{article.snippet}</p>
+      <p>{article.byline.original}</p>
+      <p>Published on: {new Date(article.pub_date).toLocaleDateString()}</p>
+      <a href={article.web_url} target="_blank" class="read-more">Read more</a>
+    </article>
+  {/each}
 </main>
-
-<style>
-  .logo {
-    height: 6em;
-    padding: 1.5em;
-    will-change: filter;
-    transition: filter 300ms;
-  }
-  .logo:hover {
-    filter: drop-shadow(0 0 2em #646cffaa);
-  }
-  .logo.svelte:hover {
-    filter: drop-shadow(0 0 2em #ff3e00aa);
-  }
-  .read-the-docs {
-    color: #888;
-  }
-</style>
+<footer>
+  <!-- footer for additonal information -->
+  <div class="footer-content">
+    <p>
+      <!-- CSS validator pass -->
+      <a href="https://jigsaw.w3.org/css-validator/check/referer">
+        <img
+          style="border:0;width:88px;height:31px"
+          src="https://jigsaw.w3.org/css-validator/images/vcss"
+          alt="Valid CSS!"
+        />
+      </a>
+    </p>
+    <p>&copy; 2025 The New York Times</p>
+    <p>Zoey Vo, Loc Nguyen</p>
+  </div>
+</footer>

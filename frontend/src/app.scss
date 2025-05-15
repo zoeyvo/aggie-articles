@@ -1,0 +1,289 @@
+// Variables
+$primary-font: 'Georgia', 'Times New Roman', 'Times', 'serif';
+$secondary-font: 'Helvetica Neue', $primary-font;
+$max-width: 1600px;
+$text-color: #333;
+$hover-color: #ff9ff5;
+$footer-bg: #f0f0f0;
+$border-color: #cbc9c9;
+$visited-link: rgb(141, 92, 255);
+
+// Breakpoints
+$mobile-width: 768px;
+$tablet-width: 1024px;
+
+// Reset
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+// Base styles
+body {
+  font-family: $primary-font;
+  font-size: 1rem;
+  line-height: 1.5;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+// Header styles
+header {
+  margin: 2rem 0rem;
+  
+  .header-container {
+    display: flex;
+    align-items: center;
+    position: relative;
+    max-width: $max-width;
+    margin-left: auto;
+    margin-right: auto;
+    
+    img {
+      margin: 0 auto;
+      max-width: 50%;
+      display: block;
+      height: auto;
+    }
+  }
+}
+
+#current-date {
+  font-family: $secondary-font;
+  position: absolute;
+  left: 0;
+  padding: 1rem 0;
+}
+
+// Navigation styles
+nav {
+  max-width: $max-width;
+  margin: 0 auto;
+}
+
+.main-nav {
+  > ul {
+    max-width: $max-width;
+    display: flex;
+    justify-content: space-between;
+    list-style: none;
+    margin: 1rem;
+    padding: 1rem 0;
+  }
+}
+
+.nav-item {
+  > a {
+    text-decoration: none;
+    color: $text-color;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    
+    &:hover {
+      color: $hover-color;
+    }
+  }
+}
+
+hr {
+  margin: 0.0625rem auto;
+  width: 95%;
+  max-width: $max-width;
+}
+
+// Article content
+main {
+  padding: 1rem 2rem;
+  max-width: $max-width;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  row-gap: 2rem;
+  column-gap: 1rem;
+}
+
+article {
+  position: relative;
+  padding-right: 1rem;
+  padding-bottom: 1rem;
+  height: 100%;
+  border-right: none;
+  border-bottom: none;
+  
+  // Horizontal lines
+  &::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 95%;
+    height: 1px;
+    background: $text-color;
+  }
+  
+  // Vertical lines
+  &:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    top: 5%;
+    right: 0;
+    width: 1px;
+    height: 90%;
+    background: $text-color;
+  }
+  
+  h2 {
+    margin-bottom: 1rem;
+  }
+  
+  p {
+    margin-bottom: 1rem;
+  }
+}
+
+img {
+  width: 100%;
+}
+
+// Footer styles
+footer {
+  background-color: $footer-bg;
+  padding: 1rem 2rem;
+  margin-top: auto;
+  border-top: 1px solid $border-color;
+  
+  a:visited {
+    color: $visited-link;
+  }
+}
+
+.footer-content {
+  max-width: $max-width;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem 2rem;
+  gap: 1rem;
+  font-size: 1rem;
+  
+  p {
+    color: #666;
+    font-size: 0.875rem;
+    margin: 0;
+  }
+  
+  a {
+    font-size: 0.875rem;
+  }
+}
+
+// Media queries using mixins
+@mixin desktop {
+  @media (min-width: $tablet-width + 1px) {
+    @content;
+  }
+}
+
+@mixin tablet {
+  @media (min-width: $mobile-width + 1px) and (max-width: $tablet-width) {
+    @content;
+  }
+}
+
+@mixin mobile {
+  @media (max-width: $mobile-width) {
+    @content;
+  }
+}
+
+// Desktop styles (> 1025px)
+@include desktop {
+  main {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  article {
+    &:nth-child(3n) {
+      border-right: none;
+      
+      &::after {
+        display: none;
+      }
+    }
+  }
+}
+
+// Tablet styles (769px - 1024px)
+@include tablet {
+  main {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  article {
+    &:nth-child(2n) {
+      border-right: none;
+      
+      &::after {
+        display: none;
+      }
+    }
+  }
+  
+  .main-nav > ul {
+    font-size: 0.8rem;
+  }
+  
+  #current-date {
+    font-size: 0.8rem;
+  }
+}
+
+// Mobile styles (< 769px)
+@include mobile {
+  main {
+    grid-template-columns: 1fr;
+  }
+  
+  article {
+    &:nth-child(1n) {
+      border-right: none;
+      
+      &::after {
+        display: none;
+      }
+    }
+  }
+  
+  .main-nav > ul {
+    flex-direction: column;
+  }
+  
+  .header-container {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  #current-date {
+    position: static;
+    font-size: 0.75rem;
+    text-align: center;
+    display: block;
+    width: 100%;
+  }
+  
+  .header-container img {
+    margin: 0;
+    max-width: 80%;
+  }
+  
+  .footer-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.5rem;
+  }
+}
