@@ -21,22 +21,22 @@
   <nav class="main-nav">
     <ul>
       <!-- list of potential pages -->
-      <li class="nav-item"><a href="#">U.S.</a></li>
-      <li class="nav-item"><a href="#">World</a></li>
-      <li class="nav-item"><a href="#">Business</a></li>
-      <li class="nav-item"><a href="#">Arts</a></li>
-      <li class="nav-item"><a href="#">Lifestyle</a></li>
-      <li class="nav-item"><a href="#">Opinion</a></li>
-      <li class="nav-item"><a href="#">Audio</a></li>
-      <li class="nav-item"><a href="#">Games</a></li>
-      <li class="nav-item"><a href="#">Cooking</a></li>
-      <li class="nav-item"><a href="#">Wirecutter</a></li>
-      <li class="nav-item"><a href="#">Atlantic</a></li>
+      <li class="nav-item"><a href="https://www.nytimes.com/section/us" target="_blank" rel="noopener noreferrer">U.S.</a></li>
+      <li class="nav-item"><a href="https://www.nytimes.com/section/world" target="_blank" rel="noopener noreferrer">World</a></li>
+      <li class="nav-item"><a href="https://www.nytimes.com/section/business" target="_blank" rel="noopener noreferrer">Business</a></li>
+      <li class="nav-item"><a href="https://www.nytimes.com/section/arts" target="_blank" rel="noopener noreferrer">Arts</a></li>
+      <li class="nav-item"><a href="https://www.nytimes.com/section/style" target="_blank" rel="noopener noreferrer">Lifestyle</a></li>
+      <li class="nav-item"><a href="https://www.nytimes.com/section/opinion" target="_blank" rel="noopener noreferrer">Opinion</a></li>
+      <li class="nav-item"><a href="https://www.nytimes.com/section/audio" target="_blank" rel="noopener noreferrer">Audio</a></li>
+      <li class="nav-item"><a href="https://www.nytimes.com/crosswords" target="_blank" rel="noopener noreferrer">Games</a></li>
+      <li class="nav-item"><a href="https://cooking.nytimes.com/" target="_blank" rel="noopener noreferrer">Cooking</a></li>
+      <li class="nav-item"><a href="https://www.nytimes.com/wirecutter/" target="_blank" rel="noopener noreferrer">Wirecutter</a></li>
+      <li class="nav-item"><a href="https://www.theatlantic.com/" target="_blank" rel="noopener noreferrer">Atlantic</a></li>
     </ul>
   </nav>
+  <hr/>
+  <hr/>
 </header>
-<hr />
-<hr />
 <main>
   <!-- Main content displayed as a media-responsive grid -->
   <!-- Iterate over retrieved articles -->

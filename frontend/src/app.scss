@@ -40,6 +40,8 @@ header {
     max-width: $max-width;
     margin-left: auto;
     margin-right: auto;
+    padding-left: 2rem;
+    padding-right: 2rem;
     
     img {
       margin: 0 auto;
@@ -54,23 +56,25 @@ header {
   font-family: $secondary-font;
   position: absolute;
   left: 0;
-  padding: 1rem 0;
+  padding-left: 2rem;
 }
 
 // Navigation styles
 nav {
   max-width: $max-width;
   margin: 0 auto;
+  padding: 0 2rem;
 }
 
 .main-nav {
   > ul {
-    max-width: $max-width;
+    max-width: calc($max-width - 4rem);
     display: flex;
     justify-content: space-between;
     list-style: none;
-    margin: 1rem;
-    padding: 1rem 0;
+    padding: 0;
+    margin: 1rem 0;
+    width: 100%;
   }
 }
 
@@ -89,14 +93,15 @@ nav {
 }
 
 hr {
-  margin: 0.0625rem auto;
-  width: 95%;
-  max-width: $max-width;
+  margin: 0.125rem auto;
+  width: calc(100% - 4rem); /* Subtract left and right padding */
+  max-width: calc($max-width - 4rem);
+  box-sizing: border-box;
 }
 
 // Article content
 main {
-  padding: 1rem 2rem;
+  padding: 0 2rem;
   max-width: $max-width;
   margin: 0 auto;
   display: grid;
@@ -107,36 +112,32 @@ main {
 
 article {
   position: relative;
-  padding-right: 1rem;
-  padding-bottom: 1rem;
+  padding: 0 0.5rem 1rem 0.5rem; /* Equal padding on both sides */
   height: 100%;
-  border-right: none;
-  border-bottom: none;
   
-  // Horizontal lines
+  // Horizontal lines - for all articles 
   &::before {
     content: "";
     position: absolute;
     left: 0;
     bottom: 0;
-    width: 95%;
+    width: 100%;
     height: 1px;
     background: $text-color;
+    opacity: 0.5; // Lighter line to match NYT style
   }
   
-  // Vertical lines
-  &:not(:last-child)::after {
-    content: "";
-    position: absolute;
-    top: 5%;
-    right: 0;
-    width: 1px;
-    height: 90%;
-    background: $text-color;
+  // Remove all vertical lines by default
+  &::after {
+    display: none; /* Hide all vertical lines by default */
   }
+  
+  // Add margin between articles
+  margin-bottom: 1.5rem;
   
   h2 {
     margin-bottom: 1rem;
+    font-weight: normal; // More NYT-like
   }
   
   p {
@@ -183,13 +184,13 @@ footer {
 
 // Media queries using mixins
 @mixin desktop {
-  @media (min-width: $tablet-width + 1px) {
+  @media (min-width: #{$tablet-width + 1px}) {
     @content;
   }
 }
 
 @mixin tablet {
-  @media (min-width: $mobile-width + 1px) and (max-width: $tablet-width) {
+  @media (min-width: #{$mobile-width + 1px}) and (max-width: #{$tablet-width}) {
     @content;
   }
 }
@@ -207,12 +208,44 @@ footer {
   }
   
   article {
+    // Left padding 0 for first article in each row
+    &:nth-child(3n-2) {
+      padding-left: 0;
+    }
+    
+    // Right padding 0 for last article in each row
     &:nth-child(3n) {
-      border-right: none;
-      
-      &::after {
-        display: none;
-      }
+      padding-right: 0;
+    }
+    
+    // No bottom border for last 3 articles
+    &:nth-last-child(-n+3)::before {
+      display: none;
+    }
+    
+    // Add vertical lines ONLY between articles
+    &:nth-child(3n-1)::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: -0.5rem; // Move border to be more centered between columns
+      width: 1px;
+      height: 90%;
+      background: $text-color;
+      opacity: 0.3;
+      display: block;
+    }
+    
+    &:nth-child(3n-2)::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: -0.5rem; // Move border to be more centered between columns
+      width: 1px;
+      height: 90%;
+      background: $text-color;
+      opacity: 0.3;
+      display: block;
     }
   }
 }
@@ -224,12 +257,32 @@ footer {
   }
   
   article {
+    // Left padding 0 for first article in each row
+    &:nth-child(2n-1) {
+      padding-left: 0;
+    }
+    
+    // Right padding 0 for last article in each row
     &:nth-child(2n) {
-      border-right: none;
-      
-      &::after {
-        display: none;
-      }
+      padding-right: 0;
+    }
+    
+    // No bottom border for last 2 articles
+    &:nth-last-child(-n+2)::before {
+      display: none;
+    }
+    
+    // Add vertical lines ONLY between articles in tablet view
+    &:nth-child(2n-1)::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: -0.5rem; // Move border to be more centered between columns
+      width: 1px;
+      height: 90%;
+      background: $text-color;
+      opacity: 0.3;
+      display: block;
     }
   }
   
@@ -246,39 +299,75 @@ footer {
 @include mobile {
   main {
     grid-template-columns: 1fr;
+    padding: 0 1rem; // Reduced side padding
   }
   
   article {
-    &:nth-child(1n) {
-      border-right: none;
-      
-      &::after {
-        display: none;
-      }
+    // No side padding in mobile view
+    padding-left: 0;
+    padding-right: 0;
+    
+    // No bottom border for last article
+    &:last-child::before {
+      display: none;
+    }
+    
+    // No vertical lines in mobile view, only horizontal
+    &::after {
+      display: none;
     }
   }
   
-  .main-nav > ul {
-    flex-direction: column;
+  nav {
+    padding: 0 1rem; // Match main padding
+  }
+  
+  .main-nav {
+    padding: 2rem;
+    
+    > ul {
+      flex-direction: column;
+      padding: 0;
+      margin: 0.5rem 0;
+    }
+  }
+  
+  .nav-item {
+    > a {
+      padding: 0.5rem 0 0.5rem 0; // No left padding
+    }
+  }
+  
+  header {
+    margin: 1rem 0; // Reduced margin
   }
   
   .header-container {
     flex-direction: column;
     align-items: center;
     gap: 0.5rem;
+    padding: 0 1rem; // Consistent with other padding
   }
   
   #current-date {
     position: static;
     font-size: 0.75rem;
-    text-align: center;
     display: block;
     width: 100%;
+    padding: 0; // No padding
+    margin-left: 0; // Ensure no margin
+    text-align: left; // Ensure text is left-aligned
+  }
+  
+  hr {
+    width: calc(100% - 2rem); /* Add consistent padding like other views */
+    max-width: calc($max-width - 2rem);
+    margin: 0.125rem auto; /* Use auto margin for horizontal centering */
   }
   
   .header-container img {
     margin: 0;
-    max-width: 80%;
+    max-width: 75%;
   }
   
   .footer-content {
