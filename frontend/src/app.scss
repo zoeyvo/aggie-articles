@@ -32,8 +32,7 @@ body {
 // Header styles
 header {
   margin: 2rem 0rem;
-  
-  .header-container {
+    .header-container {
     display: flex;
     align-items: center;
     position: relative;
@@ -45,9 +44,10 @@ header {
     
     img {
       margin: 0 auto;
-      max-width: 50%;
+      max-width: 50%; /* Set to 50% for desktop and tablet */
       display: block;
       height: auto;
+      transition: max-width 0.3s ease; /* Smooth transition when resizing */
     }
   }
 }
@@ -217,10 +217,15 @@ footer {
     &:nth-child(3n) {
       padding-right: 0;
     }
-    
-    // No bottom border for last 3 articles
-    &:nth-last-child(-n+3)::before {
-      display: none;
+      // No bottom border ONLY for articles in the last row
+    // Use a more accurate algorithm to target only the last row
+    // This works even if the last row isn't completely filled
+    &:nth-last-child(-n+3):nth-child(3n+1),  /* First article in last row */
+    &:nth-last-child(-n+2):nth-child(3n+2),  /* Second article in last row */
+    &:nth-last-child(-n+1):nth-child(3n) {   /* Third article in last row */
+      &::before {
+        display: none;
+      }
     }
     
     // Add vertical lines ONLY between articles
@@ -323,7 +328,8 @@ footer {
   }
   
   .main-nav {
-    padding: 2rem;
+    padding: 0.5rem 1rem;
+    margin-top: 0.25rem;
     
     > ul {
       flex-direction: column;
@@ -339,35 +345,43 @@ footer {
   }
   
   header {
-    margin: 1rem 0; // Reduced margin
-  }
-  
-  .header-container {
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0 1rem; // Consistent with other padding
-  }
-  
+    margin: 1rem 0 1rem; // Adjusted margins for new layout
+    .header-container {
+      flex-direction: column;
+      align-items: center; /* Center the logo horizontally */
+      gap: 0; /* Remove gap to control spacing with margins instead */
+      padding: 0; /* Remove padding for full-width logo */
+      width: 100%; /* Ensure full width */
+      display: flex;
+      margin: 0.75rem 0; /* Add vertical margin for more space */#current-date {
+        position: static;
+        font-size: 0.9rem;
+        display: block;
+        width: 100%;
+        padding: 0 1rem;
+        margin: 1rem 0 0.5rem;
+        text-align: left;
+        font-weight: 500;
+        order: 2; /* Ensure it appears after the image */
+      }      img {
+        margin: 0;
+        max-width: 100%; /* Full width */
+        width: 100%; /* Force full width */
+        height: auto;
+        order: 1; /* Ensure image appears first */
+      }
+    }
+}
+    /* Override the global #current-date style */
   #current-date {
-    position: static;
-    font-size: 0.75rem;
-    display: block;
-    width: 100%;
-    padding: 0; // No padding
-    margin-left: 0; // Ensure no margin
-    text-align: left; // Ensure text is left-aligned
+    position: static !important;
+    left: auto !important;
   }
   
   hr {
     width: calc(100% - 2rem); /* Add consistent padding like other views */
     max-width: calc($max-width - 2rem);
     margin: 0.125rem auto; /* Use auto margin for horizontal centering */
-  }
-  
-  .header-container img {
-    margin: 0;
-    max-width: 75%;
   }
   
   .footer-content {
