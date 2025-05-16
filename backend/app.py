@@ -1,8 +1,9 @@
-from flask import Flask, jsonify, send_from_directory, request
+from flask import Flask, jsonify, send_from_directory, request, session, redirect, url_for
+from functools import wraps
 import os
 from flask_cors import CORS
 from pymongo import MongoClient
-import requests # required for making HTTP requests
+import requests 
 from urllib.parse import unquote
 from authlib.integrations.flask_client import OAuth
 
@@ -15,14 +16,12 @@ mongo = MongoClient(mongo_uri)
 db = mongo.get_default_database()
 
 app = Flask(__name__, static_folder=static_path, template_folder=template_path)
+
 # Configure CORS to allow cookies to be sent in cross-origin requests
 CORS(app, supports_credentials=True)
 
-
+# Configure OAuth with Dex
 oauth = OAuth(app)
-# We need different configurations for browser vs internal communication
-# - The Flask backend communicates with Dex via Docker internal network (dex:5556)
-# - The browser communicates with Dex via localhost:5556
 oauth.register(
     name='dex',
     client_id='flask-app',
@@ -43,9 +42,6 @@ app.config['PERMANENT_SESSION_LIFETIME'] = 60 * 60 * 24  # 24 hours in seconds
 app.config['SESSION_COOKIE_SECURE'] = False  # Set to True in production with HTTPS
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Important for cross-domain cookies
-
-from flask import redirect, url_for, session
-from functools import wraps
 
 @app.route('/login')
 def login():
@@ -68,12 +64,12 @@ def auth_callback():
         session.permanent = True
 
         print(f"User authenticated: {userinfo.get('email', 'unknown email')}")
-        return redirect('http://localhost:8000/?auth_success=' + os.urandom(4).hex())
+        return redirect(f'http://localhost:{os.getenv("FRONTEND_PORT")}/?auth_success=' + os.urandom(4).hex())
     except Exception as e:
         print(f"Authentication error: {str(e)}")
         import traceback
         traceback.print_exc()
-        return redirect('http://localhost:8000/?auth_error=1')
+        return redirect(f'http://localhost:{os.getenv("FRONTEND_PORT")}/?auth_error=1')
 
 def login_required(f):
     @wraps(f)
@@ -176,10 +172,6 @@ def serve_frontend(path=''):
     if path != '' and os.path.exists(os.path.join(static_path, path)):
         return send_from_directory(static_path, path)
     return send_from_directory(template_path, 'index.html')
-
-@app.route("/test-mongo")
-def test_mongo():
-    return jsonify({"collections": db.list_collection_names()})
 
 @app.route('/api/user')
 def get_user():

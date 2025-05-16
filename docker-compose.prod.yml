@@ -16,6 +16,8 @@ services:
     env_file:
       - .env
       - .env.prod
+    ports:
+      - "27017:27017"
     volumes:
       - mongo_data:/data/db
 
