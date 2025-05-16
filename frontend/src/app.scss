@@ -260,6 +260,30 @@ article {
         }
       }
     }
+    
+    .login-prompt {
+      margin-top: 1rem;
+      padding: 0.5rem;
+      background-color: #f8f8f8;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      
+      p {
+        margin: 0;
+        font-family: $secondary-font;
+        font-size: 0.9rem;
+        text-align: center;
+      }
+      
+      a {
+        color: #0066cc;
+        text-decoration: underline;
+        
+        &:hover {
+          color: $hover-color;
+        }
+      }
+    }
   }
   
   .read-more {
@@ -309,6 +333,33 @@ footer {
   
   a {
     font-size: 0.875rem;
+  }
+}
+
+// Authentication styles
+.auth-status {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  
+  span {
+    font-family: $secondary-font;
+    font-size: 0.9rem;
+  }
+  
+  a {
+    font-family: $secondary-font;
+    font-size: 0.9rem;
+    padding: 0.25rem 0.5rem;
+    background-color: $text-color;
+    color: white;
+    border-radius: 3px;
+    text-decoration: none;
+    
+    &:hover {
+      background-color: color.adjust($text-color, $lightness: -10%);
+    }
   }
 }
 

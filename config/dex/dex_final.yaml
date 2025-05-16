@@ -1,4 +1,4 @@
-issuer: http://localhost:5556
+issuer: http://dex:5556
 
 # Storage configuration to use MongoDB
 storage:
@@ -11,6 +11,7 @@ staticClients:
   - id: flask-app
     redirectURIs:
       - http://localhost:8000/auth/callback
+      - http://backend:8000/auth/callback
     name: Flask App
     secret: flask-secret
 

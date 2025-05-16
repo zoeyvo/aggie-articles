@@ -3,6 +3,8 @@ import os
 from flask_cors import CORS
 from pymongo import MongoClient
 import requests # required for making HTTP requests
+from urllib.parse import unquote
+from authlib.integrations.flask_client import OAuth
 
 static_path = os.getenv('STATIC_PATH','static')
 template_path = os.getenv('TEMPLATE_PATH','templates')
@@ -13,7 +15,88 @@ mongo = MongoClient(mongo_uri)
 db = mongo.get_default_database()
 
 app = Flask(__name__, static_folder=static_path, template_folder=template_path)
-CORS(app)
+# Configure CORS to allow cookies to be sent in cross-origin requests
+CORS(app, supports_credentials=True)
+
+
+oauth = OAuth(app)
+# We need different configurations for browser vs internal communication
+# - The Flask backend communicates with Dex via Docker internal network (dex:5556)
+# - The browser communicates with Dex via localhost:5556
+oauth.register(
+    name='dex',
+    client_id='flask-app',
+    client_secret='flask-secret',
+    # For internal service-to-service communication
+    server_metadata_url='http://dex:5556/.well-known/openid-configuration',
+    # These URLs must be what the browser can access
+    authorize_url='http://localhost:5556/auth',
+    access_token_url='http://dex:5556/token',  # Backend uses this directly
+    userinfo_endpoint='http://dex:5556/userinfo',  # Backend uses this directly
+    client_kwargs={'scope': 'openid email profile'},
+)
+
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", "dev_secret")
+# Set session expiration to 1 day
+app.config['PERMANENT_SESSION_LIFETIME'] = 60 * 60 * 24  # 24 hours in seconds
+# Ensure session cookies are properly set for Docker environment
+app.config['SESSION_COOKIE_SECURE'] = False  # Set to True in production with HTTPS
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Important for cross-domain cookies
+
+from flask import redirect, url_for, session
+from functools import wraps
+
+@app.route('/login')
+def login():
+    # Use explicit URL with localhost for browser access
+    redirect_uri = "http://localhost:8000/auth/callback"
+    print(f"Login redirecting to Dex with callback URL: {redirect_uri}")
+    return oauth.dex.authorize_redirect(redirect_uri)
+
+@app.route('/auth/callback')
+def auth_callback():
+    try:
+        print("Auth callback started")
+        # Log request details to help with debugging
+        print(f"Request URL: {request.url}")
+        print(f"Request args: {request.args}")
+        print(f"Session before auth: {session}")
+        
+        # Handle the authorization response
+        token = oauth.dex.authorize_access_token()
+        userinfo = oauth.dex.parse_id_token(token)
+        
+        print(f"Token received: {token.keys()}")
+        print(f"User info: {userinfo}")
+        
+        # Store user info in session
+        session.clear()  # Clear any existing session data to avoid conflicts
+        session['user'] = userinfo
+        session.permanent = True  # Make session last longer
+        
+        print(f"User authenticated: {userinfo.get('email', 'unknown email')}")
+        print(f"Session after auth: {session}")
+        print(f"Session cookie will be set with these options: secure={app.config.get('SESSION_COOKIE_SECURE')}, httponly={app.config.get('SESSION_COOKIE_HTTPONLY')}, samesite={app.config.get('SESSION_COOKIE_SAMESITE')}")
+        
+        # Always redirect to the frontend root with localhost
+        # This ensures we're redirecting to a URL the browser can access
+        response = redirect('http://localhost:5173/?auth_success=' + os.urandom(4).hex())
+        return response
+    except Exception as e:
+        print(f"Authentication error: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        # Redirect to frontend with error flag
+        return redirect('http://localhost:5173/?auth_error=1')
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user' not in session:
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 @app.route('/api/key')
 def get_key():
@@ -44,10 +127,7 @@ def get_articles():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/comments/<article_id>', methods=['GET'])
-@app.route('/comments/<article_id>', methods=['GET'])  # Also handle non-API path for compatibility
 def get_comments(article_id):
-    from urllib.parse import unquote
-    
     # URL decode the article_id in case it's URL encoded
     article_id = unquote(article_id)
     
@@ -67,16 +147,22 @@ def get_comments(article_id):
     return jsonify(all_comments)  # Always returns a valid JSON array, even if empty
 
 @app.route('/api/comments', methods=['POST'])
-@app.route('/comments', methods=['POST'])  # Also handle non-API path for compatibility
+@login_required
 def add_comment():
+    # Check if user is authenticated
+    if 'user' not in session:
+        return jsonify({"error": "Authentication required"}), 401
+    
     data = request.json
     article_id = data.get('articleID')
-    username = data.get('username', 'anonymous')
+    # Get username from authenticated session
+    user_data = session['user']
+    username = user_data.get('username', user_data.get('email', 'anonymous'))
     text = data.get('text')    
     
     if not article_id or not text:
         return jsonify({"error": "Missing fields"}), 400
-      # Extract the unique identifier part after nyt://
+    # Extract the unique identifier part after nyt://
     if "nyt://" in article_id:
         article_id = article_id.split("nyt://")[1]
     elif "nyt:/" in article_id:
@@ -97,13 +183,49 @@ def add_comment():
 @app.route('/')
 @app.route('/<path:path>')
 def serve_frontend(path=''):
-    if path != '' and os.path.exists(os.path.join(static_path,path)):
+    # Allow the frontend to load even if user is not authenticated
+    # Frontend will handle showing login prompt when needed
+    if path != '' and os.path.exists(os.path.join(static_path, path)):
         return send_from_directory(static_path, path)
     return send_from_directory(template_path, 'index.html')
 
 @app.route("/test-mongo")
 def test_mongo():
     return jsonify({"collections": db.list_collection_names()})
+
+@app.route('/api/user')
+def get_user():
+    """Return the current user info if authenticated, or authentication status if not."""
+    print(f"Session keys: {list(session.keys()) if session else 'No session'}")
+    
+    if 'user' in session:
+        # Return user info from the session
+        user_data = session['user']
+        print(f"User data from session: {user_data}")
+        
+        # Extract username and other fields
+        username = user_data.get('username', user_data.get('email', 'User'))
+        email = user_data.get('email', '')
+        user_id = user_data.get('userID', user_data.get('sub', ''))
+        
+        print(f"Returning authenticated user: {username}, {email}")
+        
+        return jsonify({
+            'authenticated': True,
+            'username': username,
+            'email': email,
+            'user_id': user_id,
+        })
+    else:
+        print("No user in session, returning unauthenticated")
+        # User is not logged in - return status 200 with authenticated: false
+        return jsonify({'authenticated': False})
+
+@app.route('/logout')
+def logout():
+    """Clear the user session and redirect to home."""
+    session.pop('user', None)
+    return redirect('/')
 
 if __name__ == '__main__':
     debug_mode = os.getenv('FLASK_ENV') != 'production'
