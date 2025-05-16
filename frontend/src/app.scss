@@ -1,16 +1,42 @@
+@use "sass:color";
+
 // Variables
+// Typography
 $primary-font: 'Georgia', 'Times New Roman', 'Times', 'serif';
 $secondary-font: 'Helvetica Neue', $primary-font;
-$max-width: 1600px;
+
+// Colors
 $text-color: #333;
 $hover-color: #ff9ff5;
 $footer-bg: #f0f0f0;
 $border-color: #cbc9c9;
 $visited-link: rgb(141, 92, 255);
 
+// Layout
+$max-width: 1600px;
+
 // Breakpoints
 $mobile-width: 768px;
 $tablet-width: 1024px;
+
+// Media query mixins
+@mixin desktop {
+  @media (min-width: #{$tablet-width + 1px}) {
+    @content;
+  }
+}
+
+@mixin tablet {
+  @media (min-width: #{$mobile-width + 1px}) and (max-width: #{$tablet-width}) {
+    @content;
+  }
+}
+
+@mixin mobile {
+  @media (max-width: $mobile-width) {
+    @content;
+  }
+}
 
 // Reset
 * {
@@ -31,23 +57,21 @@ body {
 
 // Header styles
 header {
-  margin: 2rem 0rem;
-    .header-container {
+  margin: 2rem 0;
+  
+  .header-container {
     display: flex;
     align-items: center;
     position: relative;
     max-width: $max-width;
-    margin-left: auto;
-    margin-right: auto;
-    padding-left: 2rem;
-    padding-right: 2rem;
+    margin: 0 auto;
+    padding: 0 2rem;
     
     img {
       margin: 0 auto;
-      max-width: 50%; /* Set to 50% for desktop and tablet */
+      max-width: 50%;
       display: block;
       height: auto;
-      transition: max-width 0.3s ease; /* Smooth transition when resizing */
     }
   }
 }
@@ -92,14 +116,15 @@ nav {
   }
 }
 
+// Horizontal rule
 hr {
   margin: 0.125rem auto;
-  width: calc(100% - 4rem); /* Subtract left and right padding */
+  width: calc(100% - 4rem);
   max-width: calc($max-width - 4rem);
   box-sizing: border-box;
 }
 
-// Article content
+// Main content
 main {
   padding: 0 2rem;
   max-width: $max-width;
@@ -110,12 +135,14 @@ main {
   column-gap: 1rem;
 }
 
+// Article styles
 article {
   position: relative;
-  padding: 0 0.5rem 1rem 0.5rem; /* Equal padding on both sides */
+  padding: 0 0.5rem 1rem 0.5rem;
   height: 100%;
+  margin-bottom: 1.5rem;
   
-  // Horizontal lines - for all articles 
+  // Horizontal bottom border
   &::before {
     content: "";
     position: absolute;
@@ -124,27 +151,131 @@ article {
     width: 100%;
     height: 1px;
     background: $text-color;
-    opacity: 0.5; // Lighter line to match NYT style
+    opacity: 0.5;
   }
   
-  // Remove all vertical lines by default
+  // Vertical dividers (hidden by default)
   &::after {
-    display: none; /* Hide all vertical lines by default */
+    display: none;
   }
-  
-  // Add margin between articles
-  margin-bottom: 1.5rem;
   
   h2 {
     margin-bottom: 1rem;
-    font-weight: normal; // More NYT-like
+    font-weight: normal;
   }
   
   p {
     margin-bottom: 1rem;
   }
+  
+  // Comments section styling
+  .comment-button {
+    background-color: transparent;
+    border: 1px solid $text-color;
+    padding: 0.25rem 0.5rem;
+    font-family: $secondary-font;
+    font-size: 0.85rem;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
+    
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+  }
+  
+  .comment-controls {
+    margin: 1rem 0;
+    
+    button {
+      background-color: transparent;
+      border: 1px solid $text-color;
+      padding: 0.5rem 1rem;
+      font-family: $secondary-font;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      
+      &:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+      }
+    }
+  }
+  
+  .comments-section {
+    margin-top: 1rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    padding-top: 1rem;
+    
+    h4 {
+      font-family: $secondary-font;
+      font-weight: bold;
+      margin-bottom: 1rem;
+      font-size: 1.1rem;
+    }
+    
+    .no-comments {
+      font-style: italic;
+      color: #666;
+      margin-bottom: 1rem;
+    }
+    
+    .comments-list {
+      margin-bottom: 1rem;
+    }
+    
+    .comment {
+      padding: 0.5rem 0;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      margin-bottom: 0.5rem;
+      
+      p {
+        margin-bottom: 0;
+      }
+    }
+    
+    .new-comment {
+      display: flex;
+      margin-top: 1rem;
+      
+      input {
+        flex-grow: 1;
+        padding: 0.5rem;
+        border: 1px solid $border-color;
+        font-family: $secondary-font;
+        font-size: 0.9rem;
+      }
+      
+      button {
+        padding: 0.5rem 1rem;
+        background-color: $text-color;
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-family: $secondary-font;
+        margin-left: 0.5rem;
+        
+        &:hover {
+          background-color: color.adjust($text-color, $lightness: -10%);
+        }
+      }
+    }
+  }
+  
+  .read-more {
+    display: block;
+    margin-bottom: 1rem;
+    color: $text-color;
+    text-decoration: underline;
+    font-style: italic;
+    
+    &:hover {
+      color: $hover-color;
+    }
+  }
 }
 
+// Images
 img {
   width: 100%;
 }
@@ -169,7 +300,6 @@ footer {
   align-items: center;
   padding: 1rem 2rem;
   gap: 1rem;
-  font-size: 1rem;
   
   p {
     color: #666;
@@ -182,24 +312,8 @@ footer {
   }
 }
 
-// Media queries using mixins
-@mixin desktop {
-  @media (min-width: #{$tablet-width + 1px}) {
-    @content;
-  }
-}
-
-@mixin tablet {
-  @media (min-width: #{$mobile-width + 1px}) and (max-width: #{$tablet-width}) {
-    @content;
-  }
-}
-
-@mixin mobile {
-  @media (max-width: $mobile-width) {
-    @content;
-  }
-}
+// Responsive layouts
+// Note: Media query mixins moved to top of file
 
 // Desktop styles (> 1025px)
 @include desktop {
@@ -208,44 +322,31 @@ footer {
   }
   
   article {
-    // Left padding 0 for first article in each row
+    // Padding adjustments for articles in grid
     &:nth-child(3n-2) {
-      padding-left: 0;
+      padding-left: 0; // First article in each row
     }
     
-    // Right padding 0 for last article in each row
     &:nth-child(3n) {
-      padding-right: 0;
+      padding-right: 0; // Last article in each row
     }
-      // No bottom border ONLY for articles in the last row
-    // Use a more accurate algorithm to target only the last row
-    // This works even if the last row isn't completely filled
-    &:nth-last-child(-n+3):nth-child(3n+1),  /* First article in last row */
-    &:nth-last-child(-n+2):nth-child(3n+2),  /* Second article in last row */
-    &:nth-last-child(-n+1):nth-child(3n) {   /* Third article in last row */
+    
+    // Remove bottom borders for articles in the last row
+    &:nth-last-child(-n+3):nth-child(3n+1),  // First article in last row
+    &:nth-last-child(-n+2):nth-child(3n+2),  // Second article in last row
+    &:nth-last-child(-n+1):nth-child(3n) {   // Third article in last row
       &::before {
         display: none;
       }
     }
     
-    // Add vertical lines ONLY between articles
-    &:nth-child(3n-1)::after {
-      content: "";
-      position: absolute;
-      top: 0;
-      right: -0.5rem; // Move border to be more centered between columns
-      width: 1px;
-      height: 90%;
-      background: $text-color;
-      opacity: 0.3;
-      display: block;
-    }
-    
+    // Vertical dividers between articles
+    &:nth-child(3n-1)::after,
     &:nth-child(3n-2)::after {
       content: "";
       position: absolute;
       top: 0;
-      right: -0.5rem; // Move border to be more centered between columns
+      right: -0.5rem;
       width: 1px;
       height: 90%;
       background: $text-color;
@@ -262,14 +363,13 @@ footer {
   }
   
   article {
-    // Left padding 0 for first article in each row
+    // Padding adjustments for articles in grid
     &:nth-child(2n-1) {
-      padding-left: 0;
+      padding-left: 0; // First article in each row
     }
     
-    // Right padding 0 for last article in each row
     &:nth-child(2n) {
-      padding-right: 0;
+      padding-right: 0; // Last article in each row
     }
     
     // No bottom border for last 2 articles
@@ -277,12 +377,12 @@ footer {
       display: none;
     }
     
-    // Add vertical lines ONLY between articles in tablet view
+    // Vertical divider for odd-numbered articles
     &:nth-child(2n-1)::after {
       content: "";
       position: absolute;
       top: 0;
-      right: -0.5rem; // Move border to be more centered between columns
+      right: -0.5rem;
       width: 1px;
       height: 90%;
       background: $text-color;
@@ -291,10 +391,8 @@ footer {
     }
   }
   
-  .main-nav > ul {
-    font-size: 0.8rem;
-  }
-  
+  // Typography adjustments
+  .main-nav > ul,
   #current-date {
     font-size: 0.8rem;
   }
@@ -302,13 +400,13 @@ footer {
 
 // Mobile styles (< 769px)
 @include mobile {
+  // Layout adjustments
   main {
     grid-template-columns: 1fr;
-    padding: 0 1rem; // Reduced side padding
+    padding: 0 1rem;
   }
   
   article {
-    // No side padding in mobile view
     padding-left: 0;
     padding-right: 0;
     
@@ -317,14 +415,15 @@ footer {
       display: none;
     }
     
-    // No vertical lines in mobile view, only horizontal
+    // No vertical lines in mobile view
     &::after {
       display: none;
     }
   }
   
+  // Navigation adjustments
   nav {
-    padding: 0 1rem; // Match main padding
+    padding: 0 1rem;
   }
   
   .main-nav {
@@ -338,52 +437,49 @@ footer {
     }
   }
   
-  .nav-item {
-    > a {
-      padding: 0.5rem 0 0.5rem 0; // No left padding
-    }
+  .nav-item > a {
+    padding: 0.5rem 0;
   }
   
+  // Header adjustments
   header {
-    margin: 1rem 0 1rem; // Adjusted margins for new layout
+    margin: 1rem 0;
+    
     .header-container {
       flex-direction: column;
-      align-items: center; /* Center the logo horizontally */
-      gap: 0; /* Remove gap to control spacing with margins instead */
-      padding: 0; /* Remove padding for full-width logo */
-      width: 100%; /* Ensure full width */
-      display: flex;
-      margin: 0.75rem 0; /* Add vertical margin for more space */#current-date {
+      align-items: center;
+      gap: 0;
+      margin: 0 auto;
+      padding: 0 2rem;
+      width: 100%;
+      
+      #current-date {
+        margin-top: 1rem;
+        padding-left: 0;
         position: static;
-        font-size: 0.9rem;
-        display: block;
-        width: 100%;
-        padding: 0 1rem;
-        margin: 1rem 0 0.5rem;
-        text-align: left;
+        text-align: center;
         font-weight: 500;
-        order: 2; /* Ensure it appears after the image */
-      }      img {
+        order: 2;
+      }
+      
+      img {
         margin: 0;
-        max-width: 100%; /* Full width */
-        width: 100%; /* Force full width */
+        max-width: 100%;
+        width: 100%;
         height: auto;
-        order: 1; /* Ensure image appears first */
+        order: 1;
       }
     }
-}
-    /* Override the global #current-date style */
-  #current-date {
-    position: static !important;
-    left: auto !important;
   }
   
+  // Horizontal rule adjustment
   hr {
-    width: calc(100% - 2rem); /* Add consistent padding like other views */
+    width: calc(100% - 2rem);
     max-width: calc($max-width - 2rem);
-    margin: 0.125rem auto; /* Use auto margin for horizontal centering */
+    margin: 0.125rem auto;
   }
   
+  // Footer adjustments
   .footer-content {
     flex-direction: column;
     text-align: center;

@@ -43,6 +43,57 @@ def get_articles():
     except requests.exceptions.RequestException as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/comments/<article_id>', methods=['GET'])
+@app.route('/comments/<article_id>', methods=['GET'])  # Also handle non-API path for compatibility
+def get_comments(article_id):
+    from urllib.parse import unquote
+    
+    # URL decode the article_id in case it's URL encoded
+    article_id = unquote(article_id)
+    
+    # Extract the unique identifier part after nyt://
+    if "nyt://" in article_id:
+        article_id = article_id.split("nyt://")[1]
+    elif "nyt:/" in article_id:
+        article_id = article_id.split("nyt:/")[1]
+    
+    print(f"Extracted article ID: {article_id}")
+    
+    # Use article-comments collection instead of comments
+    all_comments = list(db["article-comments"].find({"articleID": article_id}))
+    for comment in all_comments:
+        comment["_id"] = str(comment["_id"])  # convert ObjectId to string
+    print(f"Fetched {len(all_comments)} comments for article ID: {article_id}")
+    return jsonify(all_comments)  # Always returns a valid JSON array, even if empty
+
+@app.route('/api/comments', methods=['POST'])
+@app.route('/comments', methods=['POST'])  # Also handle non-API path for compatibility
+def add_comment():
+    data = request.json
+    article_id = data.get('articleID')
+    username = data.get('username', 'anonymous')
+    text = data.get('text')    
+    
+    if not article_id or not text:
+        return jsonify({"error": "Missing fields"}), 400
+      # Extract the unique identifier part after nyt://
+    if "nyt://" in article_id:
+        article_id = article_id.split("nyt://")[1]
+    elif "nyt:/" in article_id:
+        article_id = article_id.split("nyt:/")[1]
+    
+    print(f"Storing comment with article ID: {article_id}")
+        
+    comment = {
+        "articleID": article_id,
+        "username": username,
+        "text": text
+    }
+
+    db["article-comments"].insert_one(comment)
+    print(f"Added comment for article ID: {article_id}")
+    return jsonify({"message": "Comment added"}), 201
+
 @app.route('/')
 @app.route('/<path:path>')
 def serve_frontend(path=''):

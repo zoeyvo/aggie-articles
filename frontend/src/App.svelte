@@ -1,14 +1,80 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import nytLogo from "./assets/nyt-logo.png";
-  import { getDate, getArticles } from "./script";
-
+  import { fetchComments, submitComment, getDate, getArticles } from "./script";
+  
   export let date_display = getDate();
 
+  // Articles array to store fetched articles
   export let articles: any[] = [];
-  onMount(async () => {
+  
+  // Store to track which articles have comments visible
+  let articleCommentsVisible: {[key: string]: boolean} = {};
+  
+  // Store comments for each article
+  let articleComments: {[key: string]: any[]} = {};
+  
+  // Track new comment input for each article
+  let newCommentText: {[key: string]: string} = {};
+  // Get a stable article ID suitable for comments
+  function getArticleIdentifier(article: any): string {
+    // First check if article has a URL with the nyt:// pattern
+    if (article.web_url && article.web_url.includes('nyt://')) {
+      console.log(`Using web_url as ID: ${article.web_url}`);
+      return article.web_url;
+    }
+    // Otherwise fallback to the article's MongoDB ID
+    console.log(`Using _id as ID: ${article._id}`);
+    return article._id;
+  }
+
+  // Toggle comments visibility for a specific article
+  async function toggleComments(article: any) {
+    const articleId = getArticleIdentifier(article);
+    
+    if (!articleCommentsVisible[articleId]) {
+      // Lazy load comments when showing them for the first time
+      if (!articleComments[articleId]) {
+        const comments = await fetchComments(articleId);
+        articleComments[articleId] = comments;
+      }
+    }
+    articleCommentsVisible[articleId] = !articleCommentsVisible[articleId];
+  }
+  
+  // Add a new comment to an article
+  async function addNewComment(article: any) {
+    const articleId = getArticleIdentifier(article);
+    
+    if (newCommentText[articleId]?.trim()) {
+      const success = await submitComment(articleId, newCommentText[articleId]);
+      
+      if (success) {
+        // Refresh comments after successful submission
+        const updatedComments = await fetchComments(articleId);
+        articleComments[articleId] = updatedComments;
+        
+        // Clear the input field
+        newCommentText[articleId] = "";
+      }
+    }
+  }  onMount(async () => {
     // Articles fetched using backend API route in app.py
     articles = await getArticles();
+    
+    // Log the first article to see its structure
+    if (articles.length > 0) {
+      console.log("First article structure:", articles[0]);
+      console.log("Article URL:", articles[0].web_url);
+    }
+    
+    // Initialize comment tracking for each article
+    articles.forEach(article => {
+      const articleId = getArticleIdentifier(article);
+      articleCommentsVisible[articleId] = false;
+      articleComments[articleId] = [];
+      newCommentText[articleId] = "";
+    });
   });
 </script>
 
@@ -46,11 +112,42 @@
         src={article.multimedia.default.url}
         alt={article.multimedia.caption}
       />
-      <h2>{article.headline.main}</h2>
-      <p>{article.snippet}</p>
-      <p>{article.byline.original}</p>
-      <p>Published on: {new Date(article.pub_date).toLocaleDateString()}</p>
-      <a href={article.web_url} target="_blank" class="read-more">Read more</a>
+      <h2><strong>{article.headline.main}</strong></h2>
+      <p>{article.snippet}</p>      <p><u>{article.byline.original}</u></p>
+      <p><em>Published on: {new Date(article.pub_date).toLocaleDateString()}</em></p>
+      <a href={article.web_url} target="_blank" class="read-more">Read more</a>      <div class="comment-controls">
+        <button on:click={() => toggleComments(article)}>
+          {articleCommentsVisible[getArticleIdentifier(article)] ? 'Hide Comments' : 'Show Comments'}
+        </button>
+      </div>
+        {#if articleCommentsVisible[getArticleIdentifier(article)]}
+        <div class="comments-section">
+          <h4>Comments</h4>
+          
+          <!-- Display comments if there are any -->
+          {#if articleComments[getArticleIdentifier(article)]?.length > 0}
+            <div class="comments-list">
+              {#each articleComments[getArticleIdentifier(article)] as comment}
+                <div class="comment">
+                  <p><strong>{comment.username || 'Anonymous'}</strong>: {comment.text}</p>
+                </div>
+              {/each}
+            </div>
+          {:else}
+            <p class="no-comments">No comments yet. Be the first to comment!</p>
+          {/if}
+          
+          <!-- New comment input and submission -->
+          <div class="new-comment">
+            <input
+              type="text"
+              placeholder="Add a comment..."
+              bind:value={newCommentText[getArticleIdentifier(article)]}
+            />
+            <button on:click={() => addNewComment(article)}>Submit</button>
+          </div>
+        </div>
+      {/if}
     </article>
   {/each}
 </main>

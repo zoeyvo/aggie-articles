@@ -1,4 +1,3 @@
-
 // Formatting for current datem, e.g. "Weekday, Month Day, Year"
 export function getDate() {
   const date = new Date();
@@ -28,4 +27,46 @@ export async function getArticles() {
   }
 
   return articles;
+}
+
+// Function to fetch comments for a specific article
+export async function fetchComments(articleID: string) {
+  try {
+    const res = await fetch(`/api/comments/${articleID}`);
+    if (!res.ok) {
+      throw new Error(`Failed to fetch comments: ${res.status}`);
+    }
+    return await res.json();
+  } catch (error) {
+    console.error("Error fetching comments:", error);
+    return [];
+  }
+}
+
+// Function to submit a new comment
+export async function submitComment(articleID: string, commentText: string) {
+  if (commentText.trim() === '') {
+    return false;
+  }
+  
+  try {
+    const response = await fetch('/api/comments', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        articleID: articleID,
+        username: 'anonymous',
+        text: commentText
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to submit comment: ${response.status}`);
+    }
+    
+    return true;
+  } catch (error) {
+    console.error("Error submitting comment:", error);
+    return false;
+  }
 }
