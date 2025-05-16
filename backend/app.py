@@ -58,37 +58,22 @@ def login():
 def auth_callback():
     try:
         print("Auth callback started")
-        # Log request details to help with debugging
-        print(f"Request URL: {request.url}")
-        print(f"Request args: {request.args}")
-        print(f"Session before auth: {session}")
-        
-        # Handle the authorization response
         token = oauth.dex.authorize_access_token()
-        userinfo = oauth.dex.parse_id_token(token)
-        
-        print(f"Token received: {token.keys()}")
+        # Use userinfo endpoint instead of parse_id_token
+        userinfo = oauth.dex.userinfo(token=token)
         print(f"User info: {userinfo}")
-        
-        # Store user info in session
-        session.clear()  # Clear any existing session data to avoid conflicts
+
+        session.clear()
         session['user'] = userinfo
-        session.permanent = True  # Make session last longer
-        
+        session.permanent = True
+
         print(f"User authenticated: {userinfo.get('email', 'unknown email')}")
-        print(f"Session after auth: {session}")
-        print(f"Session cookie will be set with these options: secure={app.config.get('SESSION_COOKIE_SECURE')}, httponly={app.config.get('SESSION_COOKIE_HTTPONLY')}, samesite={app.config.get('SESSION_COOKIE_SAMESITE')}")
-        
-        # Always redirect to the frontend root with localhost
-        # This ensures we're redirecting to a URL the browser can access
-        response = redirect('http://localhost:5173/?auth_success=' + os.urandom(4).hex())
-        return response
+        return redirect('http://localhost:8000/?auth_success=' + os.urandom(4).hex())
     except Exception as e:
         print(f"Authentication error: {str(e)}")
         import traceback
         traceback.print_exc()
-        # Redirect to frontend with error flag
-        return redirect('http://localhost:5173/?auth_error=1')
+        return redirect('http://localhost:8000/?auth_error=1')
 
 def login_required(f):
     @wraps(f)
@@ -180,11 +165,14 @@ def add_comment():
     print(f"Added comment for article ID: {article_id}")
     return jsonify({"message": "Comment added"}), 201
 
+# Force login on site entry
 @app.route('/')
 @app.route('/<path:path>')
 def serve_frontend(path=''):
-    # Allow the frontend to load even if user is not authenticated
-    # Frontend will handle showing login prompt when needed
+    if 'user' not in session:
+        # Always force login if not authenticated
+        return redirect('/login')
+    # Serve static files or index.html
     if path != '' and os.path.exists(os.path.join(static_path, path)):
         return send_from_directory(static_path, path)
     return send_from_directory(template_path, 'index.html')

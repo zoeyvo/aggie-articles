@@ -66,38 +66,7 @@
         newCommentText[articleId] = "";
       }
     }
-  }  // Function to check if user is authenticated
-  async function checkAuthStatus() {
-    const authData = await getAuthenticatedUser();
-    
-    // Always log the current status
-    console.log("Current authentication status:", authData.authenticated ? "Logged in" : "Not logged in");
-    
-    // Update user data regardless if it's changed or not
-    // This ensures we always have the latest authentication information
-    user = authData;
-    
-    // Check if we just came back from a login redirect (look for auth_success in URL)
-    if (window.location.search.includes('auth_success') && authData.authenticated) {
-      console.log("Detected successful authentication from redirect");
-      // Remove the auth_success parameter from URL without refreshing the page
-      const url = new URL(window.location.href);
-      url.searchParams.delete('auth_success');
-      window.history.replaceState({}, document.title, url.toString());
-    }
-  }    // Function to handle login
-  function handleLogin(event) {
-    event.preventDefault();
-    console.log("Login clicked - redirecting to backend login");
-    
-    // Add a timestamp to ensure no caching occurs
-    const cacheBuster = new Date().getTime();
-    
-    // Use window.location.replace for better redirect behavior
-    window.location.href = `/login?t=${cacheBuster}`;
-  }
-
-  onMount(async () => {
+  }  onMount(async () => {
     // Get authentication status
     user = await getAuthenticatedUser();
     console.log("Authentication status:", user.authenticated ? "Logged in" : "Not logged in");
@@ -118,16 +87,6 @@
       articleComments[articleId] = [];
       newCommentText[articleId] = "";
     });
-    
-    // Check auth status every 2 seconds to keep UI updated
-    // This helps in case the user logs in or out in another tab
-    const authInterval = setInterval(checkAuthStatus, 2000);
-    
-    return () => {
-      clearInterval(authInterval);
-      // Remove event listeners when component is destroyed
-      document.removeEventListener('click', handleLogin);
-    };
   });
 </script>
 
@@ -136,17 +95,10 @@
     <!-- logo image and dynamic date -->
     <img src={nytLogo} alt="The New York Times" />
     <div id="current-date">{date_display}</div>
-  </div>  <nav class="main-nav">
-    <ul>      <!-- Authentication status -->      {#if user.authenticated}
-        <li class="nav-item auth-status">
-          <span>Welcome, {user.username}</span>
-          <a href="/logout">Sign Out</a>
-        </li>      {:else}
-        <li class="nav-item auth-status">
-          <button on:click={handleLogin} class="login-btn">Sign In</button>
-        </li>
-      {/if}
-      <!-- list of potential pages -->
+  </div>
+  <nav class="main-nav">
+    <ul>
+      <!-- No authentication status, always show nav links -->
       <li class="nav-item"><a href="https://www.nytimes.com/section/us" target="_blank" rel="noopener noreferrer">U.S.</a></li>
       <li class="nav-item"><a href="https://www.nytimes.com/section/world" target="_blank" rel="noopener noreferrer">World</a></li>
       <li class="nav-item"><a href="https://www.nytimes.com/section/business" target="_blank" rel="noopener noreferrer">Business</a></li>
@@ -183,7 +135,6 @@
         {#if articleCommentsVisible[getArticleIdentifier(article)]}
         <div class="comments-section">
           <h4>Comments</h4>
-          
           <!-- Display comments if there are any -->
           {#if articleComments[getArticleIdentifier(article)]?.length > 0}
             <div class="comments-list">
@@ -196,19 +147,15 @@
           {:else}
             <p class="no-comments">No comments yet. Be the first to comment!</p>
           {/if}
-            <!-- New comment input and submission -->
-          {#if user.authenticated}
-            <div class="new-comment">
-              <input
-                type="text"
-                placeholder="Add a comment..."
-                bind:value={newCommentText[getArticleIdentifier(article)]}
-              />
-              <button on:click={() => addNewComment(article)}>Submit</button>
-            </div>          {:else}            <div class="login-prompt">
-              <p>You must <button on:click={handleLogin} class="login-link">sign in</button> to leave a comment.</p>
-            </div>
-          {/if}
+          <!-- New comment input and submission: always show since login is forced -->
+          <div class="new-comment">
+            <input
+              type="text"
+              placeholder="Add a comment..."
+              bind:value={newCommentText[getArticleIdentifier(article)]}
+            />
+            <button on:click={() => addNewComment(article)}>Submit</button>
+          </div>
         </div>
       {/if}
     </article>
