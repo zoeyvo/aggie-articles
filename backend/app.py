@@ -107,7 +107,7 @@ def get_articles():
     except requests.exceptions.RequestException as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/comments/<article_id>', methods=['GET'])
+@app.route('/api/comments/<path:article_id>', methods=['GET'])
 def get_comments(article_id):
     # URL decode the article_id in case it's URL encoded
     article_id = unquote(article_id)
