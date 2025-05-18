@@ -111,6 +111,12 @@
     <!-- logo image and dynamic date -->
     <img src={nytLogo} alt="The New York Times" />
     <div id="current-date">{date_display}</div>
+    {#if user.authenticated === false}
+      <a href="/login"><button>Log In</button></a>
+    {:else}
+      <div>Hello, {user.username}</div>
+      <a href="/logout"><button>Log Out</button></a>
+    {/if}
   </div>
   <nav class="main-nav">
     <ul>
@@ -248,14 +254,18 @@
             <p class="no-comments">No comments yet. Be the first to comment!</p>
           {/if}
           <!-- New comment input and submission: always show since login is forced -->
-          <div class="new-comment">
-            <input
-              type="text"
-              placeholder="Add a comment..."
-              bind:value={newCommentText[getArticleIdentifier(article)]}
-            />
-            <button on:click={() => addNewComment(article)}>Submit</button>
-          </div>
+          {#if user.authenticated === true}
+            <div class="new-comment">
+              <input
+                type="text"
+                placeholder="Add a comment..."
+                bind:value={newCommentText[getArticleIdentifier(article)]}
+              />
+              <button on:click={() => addNewComment(article)}>Submit</button>
+            </div>
+          {:else}
+            <div>You need to log in to comment</div>
+          {/if}
         </div>
       {/if}
     </article>

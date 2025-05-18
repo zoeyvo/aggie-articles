@@ -181,9 +181,9 @@ def moderate_comment(comment_id):
 @app.route('/')
 @app.route('/<path:path>')
 def serve_frontend(path=''):
-    if 'user' not in session:
-        # Always force login if not authenticated
-        return redirect('/login')
+    # if 'user' not in session:
+    #     # Always force login if not authenticated
+    #     return redirect('/login')
     # Serve static files or index.html
     if path != '' and os.path.exists(os.path.join(static_path, path)):
         return send_from_directory(static_path, path)

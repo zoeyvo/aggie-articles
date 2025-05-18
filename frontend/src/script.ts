@@ -10,7 +10,7 @@ export function getDate() {
   return date.toLocaleDateString("en-US", options);
 }
 
-
+// Function to fetch all articles from backend
 export async function getArticles() {
   let articles: any[] = []; // Array to store fetched articles
 
@@ -74,6 +74,7 @@ export async function submitComment(articleID: string, commentText: string) {
   }
 }
 
+// Function for mod/admin to mark comment as deleted
 export async function moderateComment(commentId: string) {
   try {
     const response = await fetch(`api/moderate/${commentId}`, {
