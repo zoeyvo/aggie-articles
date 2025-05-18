@@ -4,6 +4,7 @@
   import {
     fetchComments,
     submitComment,
+    moderateComment,
     getDate,
     getArticles,
     getAuthenticatedUser,
@@ -72,6 +73,12 @@
       }
     }
   }
+
+  async function reloadComments(articleId: any) {
+    const updatedComments = await fetchComments(articleId);
+    articleComments[articleId] = updatedComments;
+  }
+
   onMount(async () => {
     // Get authentication status
     user = await getAuthenticatedUser();
@@ -224,6 +231,16 @@
                   <p>
                     <strong>{comment.username || "Anonymous"}</strong>: {comment.text}
                   </p>
+                  {#if user.email === "admin@hw3.com" || user.email === "moderator@hw3.com"}
+                    <button
+                      on:click={() => {
+                        moderateComment(comment._id);
+                        reloadComments(getArticleIdentifier(article));
+                      }}
+                    >
+                      Delete
+                    </button>
+                  {/if}
                 </div>
               {/each}
             </div>

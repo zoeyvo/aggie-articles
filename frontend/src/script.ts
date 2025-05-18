@@ -52,7 +52,7 @@ export async function submitComment(articleID: string, commentText: string) {
   if (commentText.trim() === '') {
     return false;
   }
-    try {
+  try {
     const response = await fetch('/api/comments', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -66,10 +66,30 @@ export async function submitComment(articleID: string, commentText: string) {
     if (!response.ok) {
       throw new Error(`Failed to submit comment: ${response.status}`);
     }
-    
+
     return true;
   } catch (error) {
     console.error("Error submitting comment:", error);
+    return false;
+  }
+}
+
+export async function moderateComment(commentId: string) {
+  try {
+    const response = await fetch(`api/moderate/${commentId}`, {
+      method: "PUT",
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({
+        replace: "Comment deleted by mod"
+      })
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to delete comment: ${response.status}`);
+    }
+    return true
+  } catch (error) {
+    console.error("Error deleting comment:", error);
     return false;
   }
 }
@@ -78,10 +98,10 @@ export async function submitComment(articleID: string, commentText: string) {
 export async function getAuthenticatedUser() {
   try {
     console.log('Fetching authentication status...');
-    
+
     // Add random query parameter to prevent caching
     const cacheBuster = new Date().getTime();
-    
+
     const response = await fetch(`/api/user?t=${cacheBuster}`, {
       credentials: 'include', // Include cookies in the request for session data
       headers: {
@@ -90,7 +110,7 @@ export async function getAuthenticatedUser() {
         'Pragma': 'no-cache'
       }
     });
-    
+
     if (response.ok) {
       const userData = await response.json();
       console.log('Authentication response:', userData);

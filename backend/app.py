@@ -3,6 +3,7 @@ from functools import wraps
 import os
 from flask_cors import CORS
 from pymongo import MongoClient
+from bson.objectid import ObjectId
 import requests 
 from urllib.parse import unquote
 from authlib.integrations.flask_client import OAuth
@@ -160,7 +161,22 @@ def add_comment():
     db["article-comments"].insert_one(comment)
     print(f"Added comment for article ID: {article_id}")
     return jsonify({"message": "Comment added"}), 201
-
+  
+@app.route('/api/moderate/<comment_id>', methods=['PUT'])
+def moderate_comment(comment_id):
+    data = request.json
+  
+    # Update the text field of comment object in DB
+    status = db["article-comments"].update_one(
+      {"_id": ObjectId(comment_id)}, 
+      {"$set": {"text": data.get("replace")}}
+    )
+    
+    if status.matched_count:
+      return jsonify({"message": "Comment deleted"}), 201
+    else:
+      return jsonify({"error": "Fail to delete comment"}), 400
+    
 # Force login on site entry
 @app.route('/')
 @app.route('/<path:path>')
