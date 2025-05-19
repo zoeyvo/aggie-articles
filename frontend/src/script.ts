@@ -47,6 +47,22 @@ export async function fetchComments(articleID: string) {
   }
 }
 
+// // Function to fetch replies for a specific comment
+// export async function fetchReplies(parentID: string) {
+//   try {
+//     const res = await fetch(`/api/replies/${parentID}`, {
+//       credentials: 'include', // Include cookies in the request for session data
+//     });
+//     if (!res.ok) {
+//       throw new Error(`Failed to fetch comments: ${res.status}`);
+//     }
+//     return await res.json();
+//   } catch (error) {
+//     console.error("Error fetching comments:", error);
+//     return [];
+//   }
+// }
+
 // Function to submit a new comment
 export async function submitComment(articleID: string, commentText: string) {
   if (commentText.trim() === '') {
@@ -70,6 +86,34 @@ export async function submitComment(articleID: string, commentText: string) {
     return true;
   } catch (error) {
     console.error("Error submitting comment:", error);
+    return false;
+  }
+}
+
+// Function to submit a new comment
+export async function replyComment(articleID: string, parentID: string, commentText: string) {
+  if (commentText.trim() === '') {
+    return false;
+  }
+  try {
+    const response = await fetch('/api/reply', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include', // Include cookies in the request for session data
+      body: JSON.stringify({
+        articleID: articleID,
+        parentID: parentID,
+        text: commentText
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to submit reply: ${response.status}`);
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error submitting reply:", error);
     return false;
   }
 }

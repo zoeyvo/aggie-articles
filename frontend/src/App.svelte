@@ -4,6 +4,7 @@
   import {
     fetchComments,
     submitComment,
+    replyComment,
     moderateComment,
     getDate,
     getArticles,
@@ -29,8 +30,11 @@
   // Store comments for each article
   let articleComments: { [key: string]: any[] } = {};
 
+  let articlesReplies: { [key: string]: any[] } = {};
+
   // Track new comment input for each article
   let newCommentText: { [key: string]: string } = {};
+
   // Get a stable article ID suitable for comments
   function getArticleIdentifier(article: any): string {
     // First check if article has a URL with the nyt:// pattern
@@ -49,8 +53,7 @@
 
     // Lazy load comments when showing them for the first time
     if (articleComments[articleId].length === 0) {
-      const comments = await fetchComments(articleId);
-      articleComments[articleId] = comments;
+      reloadComments(articleId);
     }
 
     articleCommentsVisible[articleId] = !articleCommentsVisible[articleId];
@@ -65,8 +68,7 @@
 
       if (success) {
         // Refresh comments after successful submission
-        const updatedComments = await fetchComments(articleId);
-        articleComments[articleId] = updatedComments;
+        reloadComments(articleId);
 
         // Clear the input field
         newCommentText[articleId] = "";
@@ -74,9 +76,44 @@
     }
   }
 
+  let newReplyText: { [key: string]: string } = {};
+  let showReplyField: { [key: string]: boolean } = {};
+
+  function openReplyField(commentID: any) {
+    showReplyField[commentID] = !showReplyField[commentID];
+  }
+
+  async function addReply(article: any, parentID: any) {
+    const articleId = getArticleIdentifier(article);
+
+    if (newReplyText[parentID]?.trim()) {
+      const success = await replyComment(
+        articleId,
+        parentID,
+        newReplyText[parentID],
+      );
+
+      if (success) {
+        reloadComments(articleId);
+
+        newReplyText[parentID] = "";
+        showReplyField[parentID] = false;
+      }
+    }
+  }
+
   async function reloadComments(articleId: any) {
     const updatedComments = await fetchComments(articleId);
-    articleComments[articleId] = updatedComments;
+
+    let rootComments = [];
+    // let replies: { [key: string]: any[] } = {};
+
+    for (const comment of updatedComments) {
+      if (!("parentID" in comment)) {
+        rootComments.push(comment);
+      }
+    }
+    articleComments[articleId] = rootComments;
   }
 
   onMount(async () => {
@@ -237,16 +274,42 @@
                   <p>
                     <strong>{comment.username || "Anonymous"}</strong>: {comment.text}
                   </p>
-                  {#if user.email === "admin@hw3.com" || user.email === "moderator@hw3.com"}
-                    <button
-                      on:click={() => {
-                        moderateComment(comment._id);
-                        reloadComments(getArticleIdentifier(article));
-                      }}
-                    >
-                      Delete
-                    </button>
-                  {/if}
+                  <div>
+                    {#if user.authenticated === true}
+                      <button on:click={() => openReplyField(comment._id)}>
+                        {showReplyField[comment._id] ? "Hide" : "Reply"}
+                      </button>
+                      {#if showReplyField[comment._id]}
+                        <div class="new-reply">
+                          <input
+                            type="text"
+                            placeholder="Add a reply..."
+                            bind:value={newReplyText[comment._id]}
+                          />
+                          <button
+                            on:click={() => addReply(article, comment._id)}
+                          >
+                            Submit
+                          </button>
+                        </div>
+                      {/if}
+                    {/if}
+                    {#if user.email === "admin@hw3.com" || user.email === "moderator@hw3.com"}
+                      <button
+                        on:click={() => {
+                          moderateComment(comment._id);
+                          reloadComments(getArticleIdentifier(article));
+                        }}
+                      >
+                        Delete
+                      </button>
+                    {/if}
+                  </div>
+                  <!-- {#each articlesReplies[comment._id] as reply}
+                    <div class="reply">
+                      - <strong>{comment.username || "Anonymous"}</strong>: {reply.text}
+                    </div>
+                  {/each} -->
                 </div>
               {/each}
             </div>

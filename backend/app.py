@@ -127,6 +127,14 @@ def get_comments(article_id):
         comment["_id"] = str(comment["_id"])  # convert ObjectId to string
     print(f"Fetched {len(all_comments)} comments for article ID: {article_id}")
     return jsonify(all_comments)  # Always returns a valid JSON array, even if empty
+  
+# @app.route('/api/replies/<parent_id>', methods=['GET'])
+# def get_replies(parent_id):
+#     # Use article-comments collection instead of comments
+#     all_replies = list(db["article-comments"].find({"parentID": parent_id}))
+#     for reply in all_replies:
+#         reply["_id"] = str(reply["_id"])  # convert ObjectId to string
+#     return jsonify(all_replies)  # Always returns a valid JSON array, even if empty
 
 @app.route('/api/comments', methods=['POST'])
 @login_required
@@ -154,6 +162,42 @@ def add_comment():
         
     comment = {
         "articleID": article_id,
+        "username": username,
+        "text": text
+    }
+
+    db["article-comments"].insert_one(comment)
+    print(f"Added comment for article ID: {article_id}")
+    return jsonify({"message": "Comment added"}), 201
+  
+@app.route('/api/reply', methods=['POST'])
+@login_required
+def add_reply():
+    # Check if user is authenticated
+    if 'user' not in session:
+        return jsonify({"error": "Authentication required"}), 401
+    
+    data = request.json
+    article_id = data.get('articleID')
+    parent_id = data.get('parentID')
+    # Get username from authenticated session
+    user_data = session['user']
+    username = user_data.get('username', user_data.get('email', 'anonymous'))
+    text = data.get('text')    
+    
+    if not article_id or not text:
+        return jsonify({"error": "Missing fields"}), 400
+    # Extract the unique identifier part after nyt://
+    if "nyt://" in article_id:
+        article_id = article_id.split("nyt://")[1]
+    elif "nyt:/" in article_id:
+        article_id = article_id.split("nyt:/")[1]
+    
+    print(f"Storing comment with article ID: {article_id}")
+        
+    comment = {
+        "articleID": article_id,
+        "parentID": parent_id,
         "username": username,
         "text": text
     }
