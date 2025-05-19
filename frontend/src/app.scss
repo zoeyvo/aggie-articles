@@ -58,7 +58,7 @@ body {
 // Header styles
 header {
   margin: 2rem 0;
-  
+
   .header-container {
     display: flex;
     align-items: center;
@@ -66,7 +66,7 @@ header {
     max-width: $max-width;
     margin: 0 auto;
     padding: 0 2rem;
-    
+
     img {
       margin: 0 auto;
       max-width: 50%;
@@ -83,6 +83,27 @@ header {
   padding-left: 2rem;
 }
 
+.login_btn {
+  background-color: transparent;
+  border: 1px solid $text-color;
+  padding: 0.25rem 0.5rem;
+  font-family: $secondary-font;
+  font-size: 20px;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.login_btn:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.login_info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 // Navigation styles
 nav {
   max-width: $max-width;
@@ -91,7 +112,7 @@ nav {
 }
 
 .main-nav {
-  > ul {
+  >ul {
     max-width: calc($max-width - 4rem);
     display: flex;
     justify-content: space-between;
@@ -103,13 +124,13 @@ nav {
 }
 
 .nav-item {
-  > a {
+  >a {
     text-decoration: none;
     color: $text-color;
     padding: 0.5rem;
     display: flex;
     align-items: center;
-    
+
     &:hover {
       color: $hover-color;
     }
@@ -141,7 +162,7 @@ article {
   padding: 0 0.5rem 1rem 0.5rem;
   height: 100%;
   margin-bottom: 1.5rem;
-  
+
   // Horizontal bottom border
   &::before {
     content: "";
@@ -153,21 +174,21 @@ article {
     background: $text-color;
     opacity: 0.5;
   }
-  
+
   // Vertical dividers (hidden by default)
   &::after {
     display: none;
   }
-  
+
   h2 {
     margin-bottom: 1rem;
     font-weight: normal;
   }
-  
+
   p {
     margin-bottom: 1rem;
   }
-  
+
   // Comments section styling
   .comment-button {
     background-color: transparent;
@@ -178,15 +199,15 @@ article {
     cursor: pointer;
     margin-top: 0.5rem;
     margin-bottom: 1rem;
-    
+
     &:hover {
       background-color: rgba(0, 0, 0, 0.05);
     }
   }
-  
+
   .comment-controls {
     margin: 1rem 0;
-    
+
     button {
       background-color: transparent;
       border: 1px solid $text-color;
@@ -195,49 +216,75 @@ article {
       font-size: 0.9rem;
       cursor: pointer;
       transition: background-color 0.2s;
-      
+
       &:hover {
         background-color: rgba(0, 0, 0, 0.05);
       }
     }
   }
-  
+
   .comments-section {
     margin-top: 1rem;
     border-top: 1px solid rgba(0, 0, 0, 0.1);
     padding-top: 1rem;
-    
+
     h4 {
       font-family: $secondary-font;
       font-weight: bold;
       margin-bottom: 1rem;
       font-size: 1.1rem;
     }
-    
+
     .no-comments {
       font-style: italic;
       color: #666;
       margin-bottom: 1rem;
     }
-    
+
     .comments-list {
       margin-bottom: 1rem;
     }
-    
+
     .comment {
       padding: 0.5rem 0;
       border-bottom: 1px solid rgba(0, 0, 0, 0.05);
       margin-bottom: 0.5rem;
-      
+
       p {
         margin-bottom: 0;
       }
     }
-    
-    .new-comment {
+
+    .reply_btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-style: italic;
+      margin-right: 10px;
+      text-decoration: underline;
+    }
+
+    .reply_btn:hover {
+      color: blue;
+    }
+
+    .delete_btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-style: italic;
+      margin-right: 10px;
+      text-decoration: underline;
+    }
+
+    .delete_btn:hover {
+      color: red;
+    }
+
+    .new_reply {
       display: flex;
-      margin-top: 1rem;
-      
+      margin-top: 0.5rem;
+
       input {
         flex-grow: 1;
         padding: 0.5rem;
@@ -245,7 +292,7 @@ article {
         font-family: $secondary-font;
         font-size: 0.9rem;
       }
-      
+
       button {
         padding: 0.5rem 1rem;
         background-color: $text-color;
@@ -254,45 +301,72 @@ article {
         cursor: pointer;
         font-family: $secondary-font;
         margin-left: 0.5rem;
-        
+
         &:hover {
           background-color: color.adjust($text-color, $lightness: -10%);
         }
       }
     }
-    
+
+    .new-comment {
+      display: flex;
+      margin-top: 1rem;
+
+      input {
+        flex-grow: 1;
+        padding: 0.5rem;
+        border: 1px solid $border-color;
+        font-family: $secondary-font;
+        font-size: 0.9rem;
+      }
+
+      button {
+        padding: 0.5rem 1rem;
+        background-color: $text-color;
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-family: $secondary-font;
+        margin-left: 0.5rem;
+
+        &:hover {
+          background-color: color.adjust($text-color, $lightness: -10%);
+        }
+      }
+    }
+
     .login-prompt {
       margin-top: 1rem;
       padding: 0.5rem;
       background-color: #f8f8f8;
       border: 1px solid #ddd;
       border-radius: 4px;
-      
+
       p {
         margin: 0;
         font-family: $secondary-font;
         font-size: 0.9rem;
         text-align: center;
       }
-      
+
       a {
         color: #0066cc;
         text-decoration: underline;
-        
+
         &:hover {
           color: $hover-color;
         }
       }
     }
   }
-  
+
   .read-more {
     display: block;
     margin-bottom: 1rem;
     color: $text-color;
     text-decoration: underline;
     font-style: italic;
-    
+
     &:hover {
       color: $hover-color;
     }
@@ -310,7 +384,7 @@ footer {
   padding: 1rem 2rem;
   margin-top: auto;
   border-top: 1px solid $border-color;
-  
+
   a:visited {
     color: $visited-link;
   }
@@ -324,13 +398,13 @@ footer {
   align-items: center;
   padding: 1rem 2rem;
   gap: 1rem;
-  
+
   p {
     color: #666;
     font-size: 0.875rem;
     margin: 0;
   }
-  
+
   a {
     font-size: 0.875rem;
   }
@@ -342,12 +416,12 @@ footer {
   display: flex;
   align-items: center;
   gap: 1rem;
-  
+
   span {
     font-family: $secondary-font;
     font-size: 0.9rem;
   }
-  
+
   a {
     font-family: $secondary-font;
     font-size: 0.9rem;
@@ -356,7 +430,7 @@ footer {
     color: white;
     border-radius: 3px;
     text-decoration: none;
-    
+
     &:hover {
       background-color: color.adjust($text-color, $lightness: -10%);
     }
@@ -371,26 +445,31 @@ footer {
   main {
     grid-template-columns: repeat(3, 1fr);
   }
-  
+
   article {
+
     // Padding adjustments for articles in grid
     &:nth-child(3n-2) {
       padding-left: 0; // First article in each row
     }
-    
+
     &:nth-child(3n) {
       padding-right: 0; // Last article in each row
     }
-    
+
     // Remove bottom borders for articles in the last row
-    &:nth-last-child(-n+3):nth-child(3n+1),  // First article in last row
-    &:nth-last-child(-n+2):nth-child(3n+2),  // Second article in last row
-    &:nth-last-child(-n+1):nth-child(3n) {   // Third article in last row
+    &:nth-last-child(-n+3):nth-child(3n+1),
+    // First article in last row
+    &:nth-last-child(-n+2):nth-child(3n+2),
+    // Second article in last row
+    &:nth-last-child(-n+1):nth-child(3n) {
+
+      // Third article in last row
       &::before {
         display: none;
       }
     }
-    
+
     // Vertical dividers between articles
     &:nth-child(3n-1)::after,
     &:nth-child(3n-2)::after {
@@ -412,22 +491,23 @@ footer {
   main {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   article {
+
     // Padding adjustments for articles in grid
     &:nth-child(2n-1) {
       padding-left: 0; // First article in each row
     }
-    
+
     &:nth-child(2n) {
       padding-right: 0; // Last article in each row
     }
-    
+
     // No bottom border for last 2 articles
     &:nth-last-child(-n+2)::before {
       display: none;
     }
-    
+
     // Vertical divider for odd-numbered articles
     &:nth-child(2n-1)::after {
       content: "";
@@ -441,9 +521,9 @@ footer {
       display: block;
     }
   }
-  
+
   // Typography adjustments
-  .main-nav > ul,
+  .main-nav>ul,
   #current-date {
     font-size: 0.8rem;
   }
@@ -451,51 +531,52 @@ footer {
 
 // Mobile styles (< 769px)
 @include mobile {
+
   // Layout adjustments
   main {
     grid-template-columns: 1fr;
     padding: 0 1rem;
   }
-  
+
   article {
     padding-left: 0;
     padding-right: 0;
-    
+
     // No bottom border for last article
     &:last-child::before {
       display: none;
     }
-    
+
     // No vertical lines in mobile view
     &::after {
       display: none;
     }
   }
-  
+
   // Navigation adjustments
   nav {
     padding: 0 1rem;
   }
-  
+
   .main-nav {
     padding: 0.5rem 1rem;
     margin-top: 0.25rem;
-    
-    > ul {
+
+    >ul {
       flex-direction: column;
       padding: 0;
       margin: 0.5rem 0;
     }
   }
-  
-  .nav-item > a {
+
+  .nav-item>a {
     padding: 0.5rem 0;
   }
-  
+
   // Header adjustments
   header {
     margin: 1rem 0;
-    
+
     .header-container {
       flex-direction: column;
       align-items: center;
@@ -503,7 +584,7 @@ footer {
       margin: 0 auto;
       padding: 0 2rem;
       width: 100%;
-      
+
       #current-date {
         margin-top: 1rem;
         padding-left: 0;
@@ -512,7 +593,7 @@ footer {
         font-weight: 500;
         order: 2;
       }
-      
+
       img {
         margin: 0;
         max-width: 100%;
@@ -522,14 +603,14 @@ footer {
       }
     }
   }
-  
+
   // Horizontal rule adjustment
   hr {
     width: calc(100% - 2rem);
     max-width: calc($max-width - 2rem);
     margin: 0.125rem auto;
   }
-  
+
   // Footer adjustments
   .footer-content {
     flex-direction: column;
