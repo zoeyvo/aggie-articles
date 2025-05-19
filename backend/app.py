@@ -128,13 +128,13 @@ def get_comments(article_id):
     print(f"Fetched {len(all_comments)} comments for article ID: {article_id}")
     return jsonify(all_comments)  # Always returns a valid JSON array, even if empty
   
-# @app.route('/api/replies/<parent_id>', methods=['GET'])
-# def get_replies(parent_id):
-#     # Use article-comments collection instead of comments
-#     all_replies = list(db["article-comments"].find({"parentID": parent_id}))
-#     for reply in all_replies:
-#         reply["_id"] = str(reply["_id"])  # convert ObjectId to string
-#     return jsonify(all_replies)  # Always returns a valid JSON array, even if empty
+@app.route('/api/replies/<parent_id>', methods=['GET'])
+def get_replies(parent_id):
+    # Use article-comments collection instead of comments
+    all_replies = list(db["article-comments"].find({"parentID": parent_id}))
+    for reply in all_replies:
+        reply["_id"] = str(reply["_id"])  # convert ObjectId to string
+    return jsonify(all_replies)  # Always returns a valid JSON array, even if empty
 
 @app.route('/api/comments', methods=['POST'])
 @login_required

@@ -47,21 +47,21 @@ export async function fetchComments(articleID: string) {
   }
 }
 
-// // Function to fetch replies for a specific comment
-// export async function fetchReplies(parentID: string) {
-//   try {
-//     const res = await fetch(`/api/replies/${parentID}`, {
-//       credentials: 'include', // Include cookies in the request for session data
-//     });
-//     if (!res.ok) {
-//       throw new Error(`Failed to fetch comments: ${res.status}`);
-//     }
-//     return await res.json();
-//   } catch (error) {
-//     console.error("Error fetching comments:", error);
-//     return [];
-//   }
-// }
+// Function to fetch replies for a specific comment
+export async function fetchReplies(parentID: string) {
+  try {
+    const res = await fetch(`/api/replies/${parentID}`, {
+      credentials: 'include', // Include cookies in the request for session data
+    });
+    if (!res.ok) {
+      throw new Error(`Failed to fetch comments: ${res.status}`);
+    }
+    return await res.json();
+  } catch (error) {
+    console.error("Error fetching comments:", error);
+    return [];
+  }
+}
 
 // Function to submit a new comment
 export async function submitComment(articleID: string, commentText: string) {
@@ -126,7 +126,7 @@ export async function moderateComment(commentId: string) {
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
       body: JSON.stringify({
-        replace: "Comment deleted by mod"
+        replace: "(DELETED)"
       })
     });
     if (!response.ok) {

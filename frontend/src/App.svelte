@@ -6,6 +6,7 @@
     submitComment,
     replyComment,
     moderateComment,
+    fetchReplies,
     getDate,
     getArticles,
     getAuthenticatedUser,
@@ -114,6 +115,11 @@
       }
     }
     articleComments[articleId] = rootComments;
+
+    for (const comment of rootComments) {
+      const replies = await fetchReplies(comment._id);
+      articlesReplies[comment._id] = replies;
+    }
   }
 
   onMount(async () => {
@@ -149,10 +155,12 @@
     <img src={nytLogo} alt="The New York Times" />
     <div id="current-date">{date_display}</div>
     {#if user.authenticated === false}
-      <a href="/login"><button>Log In</button></a>
+      <a href="/login"><button class="login_btn">Log In</button></a>
     {:else}
-      <div>Hello, {user.username}</div>
-      <a href="/logout"><button>Log Out</button></a>
+      <div class="login_info">
+        <div>Hello, {user.username}</div>
+        <a href="/logout"><button class="login_btn">Log Out</button></a>
+      </div>
     {/if}
   </div>
   <nav class="main-nav">
@@ -276,11 +284,14 @@
                   </p>
                   <div>
                     {#if user.authenticated === true}
-                      <button on:click={() => openReplyField(comment._id)}>
-                        {showReplyField[comment._id] ? "Hide" : "Reply"}
+                      <button
+                        class="reply_btn"
+                        on:click={() => openReplyField(comment._id)}
+                      >
+                        {showReplyField[comment._id] ? "Hide Replies" : "Reply"}
                       </button>
                       {#if showReplyField[comment._id]}
-                        <div class="new-reply">
+                        <div class="new_reply">
                           <input
                             type="text"
                             placeholder="Add a reply..."
@@ -289,13 +300,14 @@
                           <button
                             on:click={() => addReply(article, comment._id)}
                           >
-                            Submit
+                            Reply
                           </button>
                         </div>
                       {/if}
                     {/if}
                     {#if user.email === "admin@hw3.com" || user.email === "moderator@hw3.com"}
                       <button
+                        class="delete_btn"
                         on:click={() => {
                           moderateComment(comment._id);
                           reloadComments(getArticleIdentifier(article));
@@ -305,11 +317,22 @@
                       </button>
                     {/if}
                   </div>
-                  <!-- {#each articlesReplies[comment._id] as reply}
+                  {#each articlesReplies[comment._id] as reply}
                     <div class="reply">
-                      - <strong>{comment.username || "Anonymous"}</strong>: {reply.text}
+                      | <strong>{comment.username || "Anonymous"}</strong>: {reply.text}
                     </div>
-                  {/each} -->
+                    {#if user.email === "admin@hw3.com" || user.email === "moderator@hw3.com"}
+                      <button
+                        class="delete_btn"
+                        on:click={() => {
+                          moderateComment(reply._id);
+                          reloadComments(getArticleIdentifier(article));
+                        }}
+                      >
+                        Delete
+                      </button>
+                    {/if}
+                  {/each}
                 </div>
               {/each}
             </div>
